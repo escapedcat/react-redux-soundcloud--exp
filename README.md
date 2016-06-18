@@ -301,5 +301,83 @@ export default function configureStore(initialState) {
 }
 ```
 
+
 ## Saga is added and configured - next steps: Using sagas
+
+Here are clearly some unclear points involved. This is related to my limited knowledge of saga, redux and react itself. But let's go step by step...
+
+1. When `Login` is clicked the `auth()` action is triggered, dispatched, started, ...
+  `index.js`
+  ```
+  function mapDispatchToProps(dispatch) {
+    return {
+      onAuth: bindActionCreators(actions.loadScUser, dispatch)
+    };
+  }
+  ```
+  Is this the right way to do it with _saga_ in mind? I don't know.  
+  Maybe this is actually not needed. [Reading the beginner saga tutorial](http://yelouafi.github.io/redux-saga/docs/introduction/BeginnerTutorial.html) it looks like something dispatching the action only could work.  
+  But I don't know now and this works for now so I'll leave it. I realize though that I shouldn't trigger `loadScUser` directly because actually `watchForLoadScUser` is waiting for `LOAD_SC_USER` and would then trigger `watchForLoadScUser`.  
+  But it's ok I noticed this now. I'll fix it later.
+
+2. In `sagas.js` `loadScUser` is called directly (shouldn't) and then _yields_ the Soundcloud API call.
+
+3. `auth.js` - Here instead of doing it like [the tutorial shows]() we need to return the response so that the `yield` can handle it.
+
+I couldn't figure out how to do this properly. How to return some sort of function that does an API call and returns the result to the `yield`.  
+In the earlier tutorial I did this:
+```
+export const fetchPosts = () => {
+    return fetch(API_ENDPOINT).then( response => response.json())
+};
+```
+This is pretty straight-forward. But looking at this, I wasn't sure how to modify it:
+```
+export function auth() {
+    SC.initialize({ client_id: CLIENT_ID, redirect_uri: REDIRECT_URI });
+
+    SC.connect().then((session) => {
+      fetch(`//api.soundcloud.com/me?oauth_token=${session.oauth_token}`)
+        .then((response) => response.json())
+        .then((me) => {
+          console.log(me);
+        });
+    });
+};
+```
+Where to add the return? Or how to wrap this to return a function? Looking at the [redux-thunk]() version it looks like this:
+```
+export function auth() {
+  return function (dispatch) {
+    SC.initialize({ client_id: CLIENT_ID, redirect_uri: REDIRECT_URI });
+
+    SC.connect().then((session) => {
+      fetch(`//api.soundcloud.com/me?oauth_token=${session.oauth_token}`)
+        .then((response) => response.json())
+        .then((me) => {
+          dispatch(setMe(me));
+        });
+    });
+  };
+};
+```
+But in my _saga_ case I don't want to dispatch anything directly from inside that function. I kinda thought about returning a promise here, but couldn't make it work.
+After asking my [JavaScript Superhero](https://twitter.com/usefulthink) for help he recommended [two](https://www.twilio.com/blog/2015/10/asyncawait-the-hero-javascript-deserved.html) [articles](https://jakearchibald.com/2014/es7-async-functions/) to read. After the first one I tried this:
+```
+export const fetchScUser = () => {
+
+  return new Promise(function(resolve, reject) {
+    SC.initialize({ client_id: CLIENT_ID, redirect_uri: REDIRECT_URI });
+
+    SC.connect().then((session) => {
+      fetch(`//api.soundcloud.com/me?oauth_token=${session.oauth_token}`)
+        .then((response) => resolve(response.json()))
+    });
+  });
+
+};
+```
+I renamed it to `fetchScUser`, but that's not important. The interesting part is that this now returns the _resolved promise_ that `yield` is waiting for.  
+
+Still, I have no clue if this is the nice/right way to do it. I'll have a break now and will continue within the next days with this.
 

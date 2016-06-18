@@ -5,11 +5,11 @@ import { put, take } from 'redux-saga/effects';
 export function* loadScUser() {
 console.info('loadScUser');
   try {
-    const posts = yield fetchPosts()
-console.log(posts)
-    yield put({type: 'SC_USER_LOADED', posts})
+    const me = yield fetchScUser();
+console.log(me);
+    yield put({type: 'SC_USER_LOADED', me});
   } catch(error) {
-    yield put({type: 'SC_USER_LOAD_FAILURE', error})
+    yield put({type: 'SC_USER_LOAD_FAILURE', error});
   }
 }
 

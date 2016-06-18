@@ -269,6 +269,37 @@ And now the error message sare gone. Yay? What happens if I cklick the button no
 Object {type: "SC_USER_LOAD_FAILURE", error: ReferenceError: fetchPosts is not defined
     at loadScUser$ (http://localhost:8080/bundle.js:46598:…}
 ```
-Coffe break!!!!
+Coffee break!!!!
 
+
+## Debugging help
+
+### `webpack.config.js`
+Dunno why I didn't chekc on this earlier:
+```
+  },
+  devtool: 'source-map'
+```
+
+### [DevTools for Redux](https://github.com/gaearon/redux-devtools)
+Install teh extension and add following changes:
+
+`configureStore.js`
+```
+import { compose, createStore, applyMiddleware } from 'redux';
+
+...
+
+const enhancers = compose(
+  window.devToolsExtension ? window.devToolsExtension() : f => f
+);
+
+...
+
+export default function configureStore(initialState) {
+  return createStoreWithMiddleware(rootReducer, initialState, enhancers);
+}
+```
+
+## Saga is added and configured - next steps: Using sagas
 

@@ -9,7 +9,12 @@ import rootReducer from '../reducers/index';
 const logger = createLogger();
 const router = routerMiddleware(browserHistory);
 
-const createStoreWithMiddleware = applyMiddleware(router, logger)(createStore);
+import createSagaMiddleware from 'redux-saga';
+import { watchForLoadScUser } from '../sagas/sagas';
+
+export const sagaMiddleware = createSagaMiddleware();
+
+const createStoreWithMiddleware = applyMiddleware(router, logger, sagaMiddleware)(createStore);
 
 export default function configureStore(initialState) {
   return createStoreWithMiddleware(rootReducer, initialState);

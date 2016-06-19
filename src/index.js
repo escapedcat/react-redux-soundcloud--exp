@@ -29,9 +29,9 @@ const tracks = [
 
 const store = storeConfig.default();
 
-import { watchForLoadScUser } from './sagas/sagas';
+import { watchForAuthScUser } from './sagas/sagas';
 
-storeConfig.sagaMiddleware.run(watchForLoadScUser);
+storeConfig.sagaMiddleware.run(watchForAuthScUser);
 
 
 

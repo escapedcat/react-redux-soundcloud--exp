@@ -306,7 +306,7 @@ export default function configureStore(initialState) {
 
 Here are clearly some unclear points involved. This is related to my limited knowledge of saga, redux and react itself. But let's go step by step...
 
-1. When `Login` is clicked the `auth()` action is triggered, dispatched, started, ...
+1. When `Login` is clicked the `auth()` action is triggered, dispatched, started, ...  
   `index.js`
   ```
   function mapDispatchToProps(dispatch) {
@@ -362,7 +362,7 @@ export function auth() {
 };
 ```
 But in my _saga_ case I don't want to dispatch anything directly from inside that function. I kinda thought about returning a promise here, but couldn't make it work.
-After asking my [JavaScript Superhero](https://twitter.com/usefulthink) for help he recommended [two](https://www.twilio.com/blog/2015/10/asyncawait-the-hero-javascript-deserved.html) [articles](https://jakearchibald.com/2014/es7-async-functions/) to read. After the first one I tried this:
+After asking my [JavaScript Superhero](https://twitter.com/usefulthink) for help he recommended [two](https://www.twilio.com/blog/2015/10/asyncawait-the-hero-javascript-deserved.html) [articles](https://jakearchibald.com/2014/es7-async-functions/) to read. After reading the first article I tried this:
 ```
 export const fetchScUser = () => {
 
@@ -381,3 +381,195 @@ I renamed it to `fetchScUser`, but that's not important. The interesting part is
 
 Still, I have no clue if this is the nice/right way to do it. I'll have a break now and will continue within the next days with this.
 
+...Ok, back at it...  
+
+Regrading [my point above](2. In `sagas.js` `loadScUser` is called directly (shouldn't) and then _yields_ the Soundcloud API call.): I think I am wrong. `index.js` does not trigge rthe `saga` directly, but is dispatching the action (`actions.loadScUser`) the sage (`watchForLoadScUser`) is `taking` (watching).  
+So let me not touch this again.  
+
+Where to continue though? Forgot... let's have a look at [the official tutorial]() again and see what's up next.  
+
+
+### Set `me`
+
+The original tutorial does:
+```
+.then((me) => {
+  dispatch(setMe(me));
+});
+```
+Adding the `me` data to the store. Let's do that as well and also maybe rename our functions to be closer the original tutorial again so it's easier to follow.  
+
+#### `sagas.js`
+```
+import { fetchScUser } from '../actions/auth';
+import { put, take } from 'redux-saga/effects';
+
+
+export function* auth() {
+console.info('auth');
+  try {
+    const me = yield fetchScUser();
+console.log(me);
+    yield put({type: 'SC_USER_LOADED', me});
+  } catch(error) {
+    yield put({type: 'SC_USER_LOAD_FAILURE', error});
+  }
+}
+
+
+export function* watchForAuthScUser() {
+  while(true) {
+    yield take('AUTH_SC_USER');
+    yield auth();
+  }
+}
+```
+This means we need to change naming related functions in:
+- `components/Stream.js`
+- `index.js`
+- `actions/sc.js`
+- `constants/actionTypes.js`
+- `actions/index.js`
+
+#### `auth.js`
+And now let's combine `sc.js` and `auth.js` again to keep close to the tutorial again.
+```
+import { CLIENT_ID, REDIRECT_URI } from '../constants/auth';
+import * as actionTypes from '../constants/actionTypes';
+
+export const fetchScUser = () => {
+
+  return new Promise(function(resolve, reject) {
+    SC.initialize({ client_id: CLIENT_ID, redirect_uri: REDIRECT_URI });
+
+    SC.connect().then((session) => {
+      fetch(`//api.soundcloud.com/me?oauth_token=${session.oauth_token}`)
+        .then((response) => resolve(response.json()))
+    });
+  });
+
+};
+
+// auth/load SC user data
+export function authScUser() {
+  return {
+    type: actionTypes.AUTH_SC_USER
+  }
+}
+```
+Had to modify `actions/index.js` as well.  
+
+#### Add `setMe` function
+`constants/actionTypes.js`  
+
+```
+...
+export const ME_SET = 'ME_SET';
+```
+
+
+`actions/auth.js`  
+
+```
+function setMe(user) {
+  return {
+    type: actionTypes.ME_SET,
+    user
+  };
+}
+```
+
+#### Add new reducer
+
+#####`reducers/index.js`  
+
+```
+import { combineReducers } from 'redux';
+import { routerReducer } from 'react-router-redux';
+import auth from './auth';
+import track from './track';
+
+export default combineReducers({
+  auth,
+  track,
+  routing: routerReducer
+});
+```
+
+
+##### `reducers/auth.js`  
+
+```
+import * as actionTypes from '../constants/actionTypes';
+
+const initialState = {};
+
+export default function(state = initialState, action) {
+  switch (action.type) {
+    case actionTypes.ME_SET:
+      return setMe(state, action);
+  }
+  return state;
+}
+
+function setMe(state, action) {
+  const { user } = action;
+  return { ...state, user };
+}
+```
+
+
+##### `components/Stream/index.js`
+
+```
+...
+
+function mapStateToProps(state) {
+  const { user } = state.auth;
+  const tracks = state.track;
+  return {
+    user,
+    tracks
+  }
+}
+
+...
+```
+
+##### `components/Stream/presenter.js`
+
+```
+...
+
+function Stream({ user, tracks = [], onAuth }) {
+  return (
+    <div>
+      <div>
+        {
+          user ?
+            <div>{user.username}</div> :
+            <button onClick={onAuth} type="button">Login</button>
+        }
+
+...
+```
+
+Now I modified and added a bunch of files. `ME_SET` action is bein gtriggered and I get the SC userdata. But for som ereason the `me` is not being added to the `auth` state.  
+Found it, but again, not sure if this is correct. We don't need the special `setMe` action here, because the saga is dispatching the action and the reducer listens to it. 
+  
+Making this small change, the userdata is being added to the store and the login button will change to my _username_:
+
+##### `reducers/auth.js`  
+
+```
+...
+
+function setMe(state, action) {
+  // const { user } = action;
+  const user = action.me;
+  return { ...state, user };
+}
+
+...
+```
+Not sure if this is the way to go, but I asked myself [the question during the last tutorial]() as well.  

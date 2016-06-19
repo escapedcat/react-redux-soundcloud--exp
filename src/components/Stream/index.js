@@ -6,15 +6,18 @@ import * as actions from '../../actions'
 import Stream from './presenter';
 
 function mapStateToProps(state) {
+  const { user } = state.auth;
   const tracks = state.track;
+  
   return {
+    user,
     tracks
   }
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    onAuth: bindActionCreators(actions.loadScUser, dispatch)
+    onAuth: bindActionCreators(actions.authScUser, dispatch)
   };
 }
 

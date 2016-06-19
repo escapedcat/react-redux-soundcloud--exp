@@ -1,9 +1,8 @@
-import { auth } from './auth';
-import { loadScUser } from './sc';
+import { authScUser/*, setMe*/ } from './auth';
 import { setTracks } from './track';
 
 export {
-  auth,
-  loadScUser,
+  authScUser,
+  // setMe,
   setTracks
 };

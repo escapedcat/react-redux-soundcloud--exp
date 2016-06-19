@@ -10,11 +10,11 @@ Issue with these tutorials is, that the amount of self-thinking involved is so l
 
 ### Recap generators from earlier projects
 
-I already did [two]() [other]() tutorials on this. Let me briefly check on that code again before I continue here.  
+I already did [two](https://github.com/wesbos/Learn-Redux-Starter-Files) [other](http://joelhooks.com/blog/2016/03/20/build-an-image-gallery-using-redux-saga/) tutorials on this. Let me briefly check on that code again before I continue here.  
 
 I'm a bit confused because everyone is using different module bundlers, different babel plugins and different ES6 functionalities.  
 
-But I know I want _generators_, instead of using _fetch_ so let's try that first.  
+But I think I want _generators_, instead of using _fetch_ so let's try that first.  
 So this is wrong, I do want to use _fetch_ but in combination __WITH__ _generators_ so those can handle the _promises_.  
 If I login I get my user information. So _fetch_ works.
 
@@ -112,7 +112,7 @@ function mapDispatchToProps(dispatch) {
 
 ...
 ```
-On click the `auth` action is dispatched. Let me check how this was done in [the tutorial i did before]().  
+On click the `auth` action is dispatched. Let me check how this was done in [the tutorial I did before](https://github.com/escapedcat/egghead-react-redux-image-gallery--exp/blob/master/src/Gallery.js).  
 It was done with `componentDidMount()`. Ok, but in this case it makes sense to dispatch it on click, because we need to trigger the _soundcloud login_ before we do anything else.  
 Can we make that work? Instead of calling `auth` directly, can we instead dispatch `loadScUser`?
 
@@ -146,7 +146,7 @@ export {
 Ok, no error anymore. Let's click the button!!!!  
 Ok, works, now my addded `LOAD_SC_USER` action is dispatched, but I don't even get an error message that `fetchScUser` isn't defined. Why is that?  
 That's because the _saga middleware_ isn't yet included into the app... I think. Let's try.  
-For reference we can check on [how reduc-thunk is included the original tutorial]() and how it was done on [the other tutorial]() I did.  
+For reference we can check on [how reduc-thunk is included the original tutorial](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux/#reduxThunk) and how it was done on [the other tutorial](https://github.com/escapedcat/egghead-react-redux-image-gallery--exp/blob/master/src/main.js) I did.  
 
 ##### Adapted Wesbos tutorial
 `store.js`
@@ -213,7 +213,7 @@ Another __Error!1!11__
 ```
 bundle.js:38625 Uncaught ReferenceError: regeneratorRuntime is not defined
 ```
-Good thing is I [encountered that one already during the other tutorial]().
+Good thing is I [encountered that one already during the other tutorial](https://github.com/escapedcat/Learn-Redux-Starter-Files/tree/master/20#extending-reduxstagramjs).
 
 ##### `index.js`
 ```
@@ -322,7 +322,7 @@ Here are clearly some unclear points involved. This is related to my limited kno
 
 2. In `sagas.js` `loadScUser` is called directly (shouldn't) and then _yields_ the Soundcloud API call.
 
-3. `auth.js` - Here instead of doing it like [the tutorial shows]() we need to return the response so that the `yield` can handle it.
+3. `auth.js` - Here instead of doing it like [the tutorial shows](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux/#authentification) we need to return the response so that the `yield` can handle it.
 
 I couldn't figure out how to do this properly. How to return some sort of function that does an API call and returns the result to the `yield`.  
 In the earlier tutorial I did this:
@@ -345,7 +345,7 @@ export function auth() {
     });
 };
 ```
-Where to add the return? Or how to wrap this to return a function? Looking at the [redux-thunk]() version it looks like this:
+Where to add the return? Or how to wrap this to return a function? Looking at the [redux-thunk](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux/#setMe) version it looks like this:
 ```
 export function auth() {
   return function (dispatch) {
@@ -383,10 +383,10 @@ Still, I have no clue if this is the nice/right way to do it. I'll have a break 
 
 ...Ok, back at it...  
 
-Regrading [my point above](2. In `sagas.js` `loadScUser` is called directly (shouldn't) and then _yields_ the Soundcloud API call.): I think I am wrong. `index.js` does not trigge rthe `saga` directly, but is dispatching the action (`actions.loadScUser`) the sage (`watchForLoadScUser`) is `taking` (watching).  
+Regrading [my point (2.) above](https://github.com/escapedcat/favesound--exp#saga-is-added-and-configured---next-steps-using-sagas): I think I am wrong. `index.js` does not trigge rthe `saga` directly, but is dispatching the action (`actions.loadScUser`) the sage (`watchForLoadScUser`) is `taking` (watching).  
 So let me not touch this again.  
 
-Where to continue though? Forgot... let's have a look at [the official tutorial]() again and see what's up next.  
+Where to continue though? Forgot... let's have a look at [the official tutorial](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux/#setMe) again and see what's up next.  
 
 
 ### Set `me`
@@ -572,4 +572,4 @@ function setMe(state, action) {
 
 ...
 ```
-Not sure if this is the way to go, but I asked myself [the question during the last tutorial]() as well.  
+Not sure if this is the way to go, but I asked myself [the question during the last tutorial](https://github.com/escapedcat/Learn-Redux-Starter-Files/tree/master/20#reducerspostsjs) as well.  

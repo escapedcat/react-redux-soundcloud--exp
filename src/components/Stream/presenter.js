@@ -14,7 +14,7 @@ function Stream({ user, tracks = [], onAuth }) {
         <div>
         {
           tracks.map((track, key) => {
-            return <div className="track" key={key}>{track.title}</div>;
+            return <div className="track" key={key}>{track.origin.title}</div>;
           })
         }
       </div>

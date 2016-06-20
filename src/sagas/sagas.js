@@ -1,13 +1,23 @@
-import { fetchScUser } from '../actions/auth';
+import { connectSc, fetchScUser, fetchStream } from '../actions/auth';
 import { put, take } from 'redux-saga/effects';
 
 
 export function* auth() {
 console.info('sagas - auth');
   try {
-    const me = yield fetchScUser();
+    const session = yield connectSc();
+console.log(session);
+
+    const me = yield fetchScUser(session);
 console.log(me);
     yield put({type: 'ME_SET', me});
+
+    const activities = yield fetchStream(me, session);
+console.log(activities);
+    const tracks = activities.collection;
+
+    yield put({type: 'TRACKS_SET', tracks});
+
   } catch(error) {
     yield put({type: 'ME_SET_FAILURE', error});
   }

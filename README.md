@@ -1,7 +1,7 @@
-# the soundcloud client in react redux with saga instead of thunk
+# The soundcloud client in react redux with saga instead of thunk
 
 
-## Tutorial finsihed till _Redux Thunk_
+## Tutorial finished till _Redux Thunk_
 
 Tutorial done so far. Everything seems to be ok so far.
 I _do not_ install `whatwg-fetch` because I want to use generator functions and saga again.  
@@ -573,3 +573,113 @@ function setMe(state, action) {
 ...
 ```
 Not sure if this is the way to go, but I asked myself [the question during the last tutorial](https://github.com/escapedcat/Learn-Redux-Starter-Files/tree/master/20#reducerspostsjs) as well.  
+
+### Fetch tracks
+
+Biggest challenge here was again to make this work wihout another `.then()` on the `fetchScUser()` function.
+Issue here was that I only get `me` back from `fetchScUser()`, but for `fetchStream()` I would need `me` and my `session`. I wasn't sure how to do this, so I decided to seperate the `fetch` calls a bit more:
+
+#### `actions/auth.js`
+
+```
+...
+
+export const connectSc = () => {
+console.info('connectSc');
+  return new Promise(function(resolve, reject) {
+    SC.initialize({ client_id: CLIENT_ID, redirect_uri: REDIRECT_URI });
+    SC.connect().then((session) => resolve( session ));
+  });
+};
+
+
+export const fetchScUser = (session) => {
+console.info('fetchScUser');
+    return fetch(`//api.soundcloud.com/me?oauth_token=${session.oauth_token}`)
+      .then( response => response.json() )
+};
+
+
+export const fetchStream = (me, session) => {
+console.info('fetchStream');
+  return fetch(`//api.soundcloud.com/me/activities?limit=20&offset=0&oauth_token=${session.oauth_token}`)
+    .then((response) => response.json())
+}
+
+...
+```
+
+#### `sagas.js`
+
+The saga needs to be changed accordingly:
+
+```
+import { connectSc, fetchScUser, fetchStream } from '../actions/auth';
+
+...
+
+export function* auth() {
+console.info('sagas - auth');
+  try {
+    const session = yield connectSc();
+    const me = yield fetchScUser(session);
+    yield put({type: 'ME_SET', me});
+
+    const activities = yield fetchStream(me, session);
+    const tracks = activities.collection;
+    yield put({type: 'TRACKS_SET', tracks});
+  } catch(error) {
+    yield put({type: 'ME_SET_FAILURE', error});
+  }
+}
+
+...
+
+```
+
+Adding `console.log()` to this actually shows this is working.  
+I think it's not good to do `ME_SET` and `TRACKS_SET` in one `auth()` saga, but I'll leave this for now.
+
+The other files need to be changed accordingly:
+
+#### `components/Stream/presenter.js`
+
+```
+...
+
+return <div className="track" key={key}>{track.origin.title}</div>;
+
+...
+
+```
+
+#### `index.js`
+
+Remove this:
+```
+
+-const tracks = [
+-  {
+-    title: 'Some track'
+-  },
+-  {
+-    title: 'Some other track'
+-  }
+-];
+
+-store.dispatch(actions.setTracks(tracks))
+
+```
+
+#### `actions/index.js`  
+
+I'm not sure if this is correct. As before I don't _dispatch_ the _action_, but the saga is ...hm... dispatching the _reducer_? Vocabulary is cleary still a bit unclear to me.  
+
+```
+import { authScUser } from './auth';
+
+export {
+  authScUser
+};
+```
+

@@ -1,8 +1,7 @@
-import { authScUser/*, setMe*/ } from './auth';
-// import { setTracks } from './track';
+import { authScUser } from './auth';
+import { playTrack } from './track';
 
 export {
-  authScUser//,
-  // setMe,
-  // setTracks
+  authScUser,
+  playTrack
 };

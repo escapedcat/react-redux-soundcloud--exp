@@ -685,4 +685,8 @@ export {
 Test should be adjusted as well as [shown in the tutorial](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux/#fetchTracks).
 
 
+### Finalize tutorial: SoundCloud Player
+
+For the rest please follow [the original tutorial](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux/#soundCloudPlayer) again.
+
 

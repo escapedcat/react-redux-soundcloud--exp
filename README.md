@@ -1,11 +1,12 @@
-# The soundcloud client in react redux with saga instead of thunk
+# [The soundcloud client in react redux](https://github.com/rwieruch/react-redux-soundcloud) with saga instead of thunk
 
 
 ## Tutorial finished till _Redux Thunk_
 
-Tutorial done so far. Everything seems to be ok so far.
-I _do not_ install `whatwg-fetch` because I want to use generator functions and saga again.  
-Issue with these tutorials is, that the amount of self-thinking involved is so low that it's hard to remember how and why things are done. It's a bit like technical dept, you make progress really fast, but the effort it takes later to actually understand what you have done and re-create this from scratch by yourself should not be underestimated.
+Tutorial done [so far](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux/#reduxThunk). Everything seems to be ok so far.
+I _did not_ install `whatwg-fetch` because I want to use [generator functions and saga](http://joelhooks.com/blog/2016/03/20/build-an-image-gallery-using-redux-saga) again.  
+
+Issue with tutorials is, that the amount of self-thinking involved is so low that it's hard to remember how and why things are done. It's a bit like technical dept, you make progress really fast, but the effort it takes later to actually understand what you have done and re-create this from scratch by yourself should not be underestimated.
 
 
 ### Recap generators from earlier projects
@@ -21,7 +22,7 @@ If I login I get my user information. So _fetch_ works.
 
 ### `sagas/sagas.js`
 
-Juts to start somewhere I add a _saga_ file now with a basic approach of a sage to get the _soundcloud user data_.  
+Just to start somewhere I add a `sagas` file now with a basic approach of a _saga_ to get the _soundcloud user data_.  
 
 
 ```
@@ -68,7 +69,7 @@ export function loadScUser() {
   }
 }
 ```
-And because in thsi tutorial all _action constants_ are collected in pne place I need to extend that file as well.
+And because in [the original tutorial](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux/#constantActionTypes) all _action constants_ are collected in one place I need to extend that file as well.
 
 #### `constants/actionTypes.js`
 
@@ -76,7 +77,7 @@ And because in thsi tutorial all _action constants_ are collected in pne place I
 export const TRACKS_SET = 'TRACKS_SET';
 export const LOAD_SC_USER = 'LOAD_SC_USER';
 ```
-At the momen tI don't see the benefit of doing this, but I guess in bigger applications this helps to keep the overview.
+At the moment I don't see the benefit of doing this, but I guess in bigger applications this helps to keep the overview.
 
 #### `actions/index.js`
 Also we have to add our new action here.
@@ -123,14 +124,14 @@ function mapDispatchToProps(dispatch) {
   };
 }
 ```
-If I didn't forget anything (I usually do) then this shoudl trigger the saga and then fail because the sage calls `fetchScUser` from `actions/auth` which doesn't exists (yet). Let'se try!  
+If I didn't forget anything (I usually do) then this should trigger the _saga_ and then fail because the sage calls `fetchScUser` from `actions/auth` which doesn't exists (yet). Let's try!  
  
 __Error__, I get:
 ```
 bundle.js:36037 Uncaught Error: bindActionCreators expected an object or a function, instead received undefined. Did you write "import ActionCreators from" instead of "import * as ActionCreators from"?
 ```
 #### `actions/index.js`
-I imported the `sc.js` but I did not import the correct functions. Let's try this:
+I did import `sc.js` but I did not import the correct functions. Let's try this:
 
 ```
 import { auth } from './auth';
@@ -148,7 +149,7 @@ Ok, works, now my addded `LOAD_SC_USER` action is dispatched, but I don't even g
 That's because the _saga middleware_ isn't yet included into the app... I think. Let's try.  
 For reference we can check on [how reduc-thunk is included the original tutorial](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux/#reduxThunk) and how it was done on [the other tutorial](https://github.com/escapedcat/egghead-react-redux-image-gallery--exp/blob/master/src/main.js) I did.  
 
-##### Adapted Wesbos tutorial
+##### [Adapted Wesbos tutorial](https://github.com/escapedcat/Learn-Redux-Starter-Files/blob/master/learn-redux/client/store.js)
 `store.js`
 ```
 ...
@@ -162,7 +163,7 @@ sagaMiddleware.run(watchForLoadComments);
 ...
 ```
 
-##### Original favesound tutorial
+##### [Original tutorial](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux/#reduxThunk)
 ```
 import { createStore, applyMiddleware } from 'redux';
 import createLogger from 'redux-logger';
@@ -226,7 +227,7 @@ And now I get
 ```
 Module not found: Error: Cannot resolve module 'babel-polyfill'
 ```
-Yay! So what did I miss here? I didn't actually install [https://babeljs.io/docs/usage/polyfill]. Let's do that.
+Yay! So what did I miss here? I didn't actually install [babel-polyfill](https://babeljs.io/docs/usage/polyfill). Let's do that.
 ```
 npm install --save-dev babel-polyfill
 ```
@@ -234,12 +235,13 @@ So better, but...
 ```
 bundle.js:44823 Uncaught Error: Before running a Saga, you must mount the Saga middleware on the Store using applyMiddleware
 ```
-Issue now is that I'm not sure when and where to `sagaMiddleware.run(watchForLoadScUser)`. In `configureStore.js` the store isn't created, only prepared and in `index.js` where the `store` is created I'm not sure how to use the `sagaMiddleware`. Dang.
+Issue now is that I'm not sure when and where to `sagaMiddleware.run(watchForLoadScUser)`.  
+In `configureStore.js` the store isn't created, only prepared and in `index.js` where the `store` is created I'm not sure how to use the `sagaMiddleware`. Dang.
 
 
 ###### `sagaMiddleware.run(watchForLoadScUser)`
 
-To make this work I need to things:
+To make this work I need two things:
 
 1. a ready & created `store`
 2. the `sagaMiddleware` the `store` was created with
@@ -262,9 +264,10 @@ const store = storeConfig.default();
 import { watchForLoadScUser } from './sagas/sagas';
 storeConfig.sagaMiddleware.run(watchForLoadScUser);
 ```
-And now the error message sare gone. Yay? What happens if I cklick the button now? I almost do not dare... Let's click it anyway!  
+And now the error messages are gone. Yay? What happens if I click the button now? I almost dont' dare... Let's click it anyway!  
 
-`0_o` finally what we expected to get like 2 hours ago:
+`0_o`  
+...finally what we expected to get like 2 hours ago:
 ```
 Object {type: "SC_USER_LOAD_FAILURE", error: ReferenceError: fetchPosts is not defined
     at loadScUser$ (http://localhost:8080/bundle.js:46598:…}
@@ -274,15 +277,18 @@ Coffee break!!!!
 
 ## Debugging help
 
+Generel improvements for the dev-workflow.
+
 ### `webpack.config.js`
-Dunno why I didn't chekc on this earlier:
+Dunno why I didn't check on this earlier:
 ```
   },
   devtool: 'source-map'
 ```
 
-### [DevTools for Redux](https://github.com/gaearon/redux-devtools)
-Install teh extension and add following changes:
+### [DevTools for Redux](https://github.com/gaearon/redux-devtools) for Chrome
+
+Install the extension and add following changes:
 
 `configureStore.js`
 ```
@@ -316,11 +322,11 @@ Here are clearly some unclear points involved. This is related to my limited kno
   }
   ```
   Is this the right way to do it with _saga_ in mind? I don't know.  
-  Maybe this is actually not needed. [Reading the beginner saga tutorial](http://yelouafi.github.io/redux-saga/docs/introduction/BeginnerTutorial.html) it looks like something dispatching the action only could work.  
-  But I don't know now and this works for now so I'll leave it. I realize though that I shouldn't trigger `loadScUser` directly because actually `watchForLoadScUser` is waiting for `LOAD_SC_USER` and would then trigger `watchForLoadScUser`.  
-  But it's ok I noticed this now. I'll fix it later.
+  Maybe this is actually not needed. [Reading the beginner saga tutorial](http://yelouafi.github.io/redux-saga/docs/introduction/BeginnerTutorial.html) it looks like something dispatching the action only could work. But I don't know and this works for now so I'll leave it.  
+  I realize though that I shouldn't trigger `loadScUser` directly because actually `watchForLoadScUser` is waiting for `LOAD_SC_USER` and would then trigger `watchForLoadScUser`.  
+  But it's ok I noticed this now. I'll fix it later.  
 
-2. In `sagas.js` `loadScUser` is called directly (shouldn't) and then _yields_ the Soundcloud API call.
+2. In `sagas.js` `loadScUser` is called directly (shouldn't) and then _yields_ the Soundcloud API call. (__Spoiler Alert:__ I am wrong)
 
 3. `auth.js` - Here instead of doing it like [the tutorial shows](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux/#authentification) we need to return the response so that the `yield` can handle it.
 
@@ -383,7 +389,7 @@ Still, I have no clue if this is the nice/right way to do it. I'll have a break 
 
 ...Ok, back at it...  
 
-Regrading [my point (2.) above](https://github.com/escapedcat/favesound--exp#saga-is-added-and-configured---next-steps-using-sagas): I think I am wrong. `index.js` does not trigge rthe `saga` directly, but is dispatching the action (`actions.loadScUser`) the sage (`watchForLoadScUser`) is `taking` (watching).  
+Regrading [my point (2.) above](https://github.com/escapedcat/favesound--exp#saga-is-added-and-configured---next-steps-using-sagas): I think I am wrong. `index.js` does not trigger the `saga` directly, but is dispatching the action (`actions.loadScUser`) the saga (`watchForLoadScUser`) is `taking` (watching).  
 So let me not touch this again.  
 
 Where to continue though? Forgot... let's have a look at [the official tutorial](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux/#setMe) again and see what's up next.  
@@ -397,7 +403,7 @@ The original tutorial does:
   dispatch(setMe(me));
 });
 ```
-Adding the `me` data to the store. Let's do that as well and also maybe rename our functions to be closer the original tutorial again so it's easier to follow.  
+Adding the `me` data to the store. Let's do that as well and also maybe rename our functions to be closer [the original tutorial](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux) again so it's easier to follow.  
 
 #### `sagas.js`
 ```
@@ -424,7 +430,7 @@ export function* watchForAuthScUser() {
   }
 }
 ```
-This means we need to change naming related functions in:
+This means we need to change naming-related functions in:
 - `components/Stream.js`
 - `index.js`
 - `actions/sc.js`
@@ -432,7 +438,7 @@ This means we need to change naming related functions in:
 - `actions/index.js`
 
 #### `auth.js`
-And now let's combine `sc.js` and `auth.js` again to keep close to the tutorial again.
+And now let's combine `sc.js` and `auth.js` again to keep close to [the original tutorial](http://www.robinwieruch.de/the-soundcloud-client-in-react-redux) again.
 ```
 import { CLIENT_ID, REDIRECT_URI } from '../constants/auth';
 import * as actionTypes from '../constants/actionTypes';
@@ -554,8 +560,8 @@ function Stream({ user, tracks = [], onAuth }) {
 ...
 ```
 
-Now I modified and added a bunch of files. `ME_SET` action is bein gtriggered and I get the SC userdata. But for som ereason the `me` is not being added to the `auth` state.  
-Found it, but again, not sure if this is correct. We don't need the special `setMe` action here, because the saga is dispatching the action and the reducer listens to it. 
+Now I modified and added a bunch of files. `ME_SET` action is being triggered and I get the SC userdata. But for some reason the `me` is not being added to the `auth` state.  
+Found it, but again, not sure if this is correct. We don't need the special `setMe` action here, because the saga is dispatching the action and the reducer listens to it. (No idea if this wording is correct)
   
 Making this small change, the userdata is being added to the store and the login button will change to my _username_:
 

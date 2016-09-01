@@ -57,7 +57,7 @@ If I would load this now I don't think anything will change, because I don't _di
 ### adding _load soundcloud user_ action
 
 #### `actions/sc.js`
-For now I decided to add all soundcloud related _actions_ to on file.
+For now I decided to add all soundcloud related _actions_ to one file.
 
 ```
 import * as actionTypes from '../constants/actionTypes';
@@ -93,7 +93,7 @@ export {
 };
 ```
 
-We still won't see anything I new I guess because `LOAD_SC_USER` is not dispatched somewhere. How is this triggered at the moment?
+We still won't see anything new. I guess because `LOAD_SC_USER` is not dispatched somewhere. How is this triggered at the moment?
 
 ##### `components/Stream.js`
 Let's look it up here.
@@ -131,7 +131,7 @@ __Error__, I get:
 bundle.js:36037 Uncaught Error: bindActionCreators expected an object or a function, instead received undefined. Did you write "import ActionCreators from" instead of "import * as ActionCreators from"?
 ```
 #### `actions/index.js`
-I did import `sc.js` but I did not import the correct functions. Let's try this:
+I did import `sc.js` but I _did not_ import the correct functions. Let's try this:
 
 ```
 import { auth } from './auth';
@@ -235,7 +235,7 @@ So better, but...
 ```
 bundle.js:44823 Uncaught Error: Before running a Saga, you must mount the Saga middleware on the Store using applyMiddleware
 ```
-Issue now is that I'm not sure when and where to `sagaMiddleware.run(watchForLoadScUser)`.  
+Issue now is that I'm not sure when and where to add `sagaMiddleware.run(watchForLoadScUser)`.  
 In `configureStore.js` the store isn't created, only prepared and in `index.js` where the `store` is created I'm not sure how to use the `sagaMiddleware`. Dang.
 
 
